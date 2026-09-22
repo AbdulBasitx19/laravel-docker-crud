@@ -1,0 +1,39 @@
+services:
+  # 1. Laravel App Container
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80" # Windows ka 8000 port, container ke 80 se juda hai
+    volumes:
+      - ./:/var/www/html # Aapka current folder container ke andar link ho gaya
+    depends_on:
+      - db
+
+  # 2. MySQL Database Container
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: laravel_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql # Data save rahega container band hone par bhi
+
+  # 3. phpMyAdmin Container (Database dekhne ke liye)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db # Yeh 'db' service se connect karega
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - db
+
+volumes:
+  db_data: # Yeh ensure karta hai ke database ka data delete na ho
